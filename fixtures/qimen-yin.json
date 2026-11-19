@@ -1,0 +1,12 @@
+{
+  "question_type": "投资",
+  "question_goal": "能不能投",
+  "time_input": "2026-07-15 14:00",
+  "calendar_type": "solar",
+  "location": {
+    "country": "中国",
+    "city": "北京",
+    "timezone": "Asia/Shanghai"
+  },
+  "ruleset": "mainline-cn-v1"
+}

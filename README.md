@@ -55,3 +55,17 @@ python ziwei-doushu/scripts/ziwei_cli.py --input tmp/ziwei_input.json --output t
 
 ---
 *Created as part of the AI Engineering of Traditional Divination (AI 术数工程化) initiative.*
+
+## Native Rust core (experimental fork)
+
+The original Python scripts, rules, tests, and fixtures are preserved.
+This fork adds a Rust library and JSON CLI, not a web frontend.
+
+- [Architecture, API and migration ledger](docs/RUST_MIGRATION.md)
+- `cargo run --bin numerologist -- --help`
+- `cargo run --bin numerologist -- qimen --input fixtures/qimen-yang.json --pretty`
+- `cargo run --bin numerologist -- ziwei --input fixtures/ziwei.json --pretty`
+- `cargo run --bin numerologist -- bazi --input fixtures/bazi.json --pretty`
+
+Publication is disabled until the original repository's missing license is clarified
+and the native calendar Git dependency has a publishable resolution.

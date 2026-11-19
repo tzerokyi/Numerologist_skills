@@ -1,0 +1,25 @@
+[package]
+name = "numerologist-core"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "Native Rust engines and CLI for Qimen Dunjia, Ziwei Doushu and BaZi"
+repository = "https://github.com/tzerokyi/Numerologist_skills"
+publish = false
+
+[lib]
+name = "numerologist_core"
+path = "src/lib.rs"
+
+[[bin]]
+name = "numerologist"
+path = "src/main.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Native astronomical calendar; pin revision until a compatible crates.io release is verified.
+lunar-rs = { git = "https://github.com/houseme/lunar-rs", rev = "339ba3644aef2d35a2f0f71b7bdf4c07906c5722" }
+
+[profile.release]
+lto = "thin"

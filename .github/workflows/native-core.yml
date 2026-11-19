@@ -71,16 +71,15 @@ jobs:
           test "$GITHUB_REF_NAME" = "feat/native-rust-core"
           header="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
           git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $header" push origin "HEAD:refs/heads/$GITHUB_REF_NAME"
-          echo 'Formatted staging commit pushed; next run validates it.'
+          echo 'Formatted staging commit pushed; validate its exact local HEAD in the next step.'
 
       - name: Strict Clippy, tests and linked CLI smoke
-        if: env.FORMAT_COMMIT != '1'
         shell: bash
         working-directory: numerologist
         run: |
           set -euo pipefail
           export PATH="$HOME/.cargo/bin:/home/agent/.cargo/bin:$PATH"
-          echo "REVISION=$(git rev-parse HEAD)"
+          echo "VALIDATED_SOURCE_SHA=$(git rev-parse HEAD)"
           echo "BUILD_JOBS=$CARGO_BUILD_JOBS"
           cargo fmt --all -- --check
           cargo clippy --locked --all-targets -- -D warnings

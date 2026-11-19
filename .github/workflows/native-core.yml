@@ -1,0 +1,92 @@
+name: Numerologist native Rust core
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/native-rust-core
+      - main
+    paths:
+      - 'src/**'
+      - 'fixtures/**'
+      - Cargo.toml
+      - Cargo.lock
+      - .github/workflows/native-core.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: numerologist-native-core
+  cancel-in-progress: false
+
+jobs:
+  rust:
+    # Never execute untrusted fork pull requests on the owner's runner.
+    runs-on: [self-hosted, linux]
+    timeout-minutes: 30
+    env:
+      CARGO_BUILD_JOBS: '12'
+      CARGO_INCREMENTAL: '1'
+      CARGO_TARGET_DIR: target
+      RUSTUP_TOOLCHAIN: '1.99.1'
+    steps:
+      - name: Checkout trusted branch
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+          clean: false
+          path: numerologist
+
+      - name: Format source and generate lock on staging only
+        shell: bash
+        working-directory: numerologist
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.cargo/bin:/home/agent/.cargo/bin:$PATH"
+          rustup run 1.99.1 rustc --version
+          rustup component add --toolchain 1.99.1 rustfmt clippy
+          cargo fmt --all
+          cargo generate-lockfile
+          if [[ -n "$(git status --porcelain -- src Cargo.lock)" ]]; then
+            test "$GITHUB_REF_NAME" = "feat/native-rust-core" || {
+              echo 'Would format main; refusing mutation'
+              exit 1
+            }
+            git add src Cargo.lock
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'chore: format native Rust and pin lock [format]'
+            echo FORMAT_COMMIT=1 >> "$GITHUB_ENV"
+          fi
+
+      - name: Push exact rustfmt bytes to staging branch
+        if: env.FORMAT_COMMIT == '1'
+        shell: bash
+        working-directory: numerologist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "feat/native-rust-core"
+          header="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $header" push origin "HEAD:refs/heads/$GITHUB_REF_NAME"
+          echo 'Formatted staging commit pushed; next run validates it.'
+
+      - name: Strict Clippy, tests and linked CLI smoke
+        if: env.FORMAT_COMMIT != '1'
+        shell: bash
+        working-directory: numerologist
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.cargo/bin:/home/agent/.cargo/bin:$PATH"
+          echo "REVISION=$(git rev-parse HEAD)"
+          echo "BUILD_JOBS=$CARGO_BUILD_JOBS"
+          cargo fmt --all -- --check
+          cargo clippy --locked --all-targets -- -D warnings
+          cargo test --locked --all-targets
+          cargo build --locked --bin numerologist
+          ./target/debug/numerologist doctor --json | grep -F '"runtime":"native-rust"'
+          ./target/debug/numerologist qimen --input fixtures/qimen-yang.json --json | grep -F '"dun_type":"阳遁"'
+          ./target/debug/numerologist qimen --input fixtures/qimen-yin.json --json | grep -F '"dun_type":"阴遁"'
+          ./target/debug/numerologist ziwei --input fixtures/ziwei.json --json | grep -F '"major_star_count":14'
+          ./target/debug/numerologist bazi --input fixtures/bazi.json --json | grep -F '"calculation":'
+          echo "BINARY=$PWD/target/debug/numerologist"

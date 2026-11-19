@@ -1,0 +1,12 @@
+{
+  "question_type": "跳槽",
+  "question_goal": "能不能动",
+  "time_input": "2026-03-24 10:30",
+  "calendar_type": "solar",
+  "location": {
+    "country": "中国",
+    "city": "上海",
+    "timezone": "Asia/Shanghai"
+  },
+  "ruleset": "mainline-cn-v1"
+}

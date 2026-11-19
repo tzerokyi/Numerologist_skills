@@ -8,7 +8,9 @@ on:
       - main
     paths:
       - 'src/**'
+      - 'tests/**'
       - 'fixtures/**'
+      - 'ziwei-doushu/scripts/tests/fixtures/**'
       - Cargo.toml
       - Cargo.lock
       - .github/workflows/native-core.yml
@@ -48,12 +50,12 @@ jobs:
           rustup component add --toolchain 1.99.1 rustfmt clippy
           cargo fmt --all
           cargo generate-lockfile
-          if [[ -n "$(git status --porcelain -- src Cargo.lock)" ]]; then
+          if [[ -n "$(git status --porcelain -- src tests Cargo.lock)" ]]; then
             test "$GITHUB_REF_NAME" = "feat/native-rust-core" || {
               echo 'Would format main; refusing mutation'
               exit 1
             }
-            git add src Cargo.lock
+            git add src tests Cargo.lock
             git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'chore: format native Rust and pin lock [format]'
             echo FORMAT_COMMIT=1 >> "$GITHUB_ENV"
           fi

@@ -10,7 +10,7 @@ No frontend, Python runtime, JavaScript, webview, server or MCP transport is use
 | --- | --- | --- | --- |
 | Qimen | `qimen::calculate(&QimenRequest)` | 24 JieQi, nine palaces, three yuan, Earth/Sky, doors, stars, gods, XunKong, Yima, structural patterns | Original golden spring/summer and issue #11 encoded as Rust tests; runner pending |
 | Ziwei | `ziwei::calculate(&ZiweiRequest)` | 14 major stars, auxiliaries, brightness, Sihua, decadal and annual fortunes, leap and late-Zi rules | Original hand chart / lunar boundary cases encoded; full iztro fixture sweep pending |
-| BaZi | `bazi::calculate(&BaziRequest)` | Exact four Ganzhi pillars | Day-master strength, Ten Gods and interpretive fortune rules not yet ported |
+| BaZi | `bazi::calculate(&BaziRequest)` | Exact four Ganzhi pillars | Day-master strength, favorable elements, precise 10-year onset, and interpretive fortune rules not yet ported |
 | Calendar | `calendar::as_solar` | Solar/lunar conversion and boundary data | `houseme/lunar-rs` pinned Git revision; exact lunar_python parity remains to verify |
 
 The current calendar library is native Rust but a Git dependency. Before
@@ -42,6 +42,8 @@ error instead of introducing hidden host-clock nondeterminism.
 - On feat/native-rust-core only, the runner commits exact rustfmt output and
   Cargo.lock to the staged branch, then checks the resulting SHA.
 - Checks: `fmt --check`, strict Clippy, tests, linked CLI build and JSON smoke.
+- Native Ziwei integration test now checks the entire pinned iztro 2.6.2 JSON corpus; the test has not yet run.
+- BaZi default 夜子时 stays on the civil day at 23:00, while exact calendar APIs may roll to the next day; this is an explicit option, not a hidden switch.
 - Python's original tests are still an **oracle**, not evidence the Rust tests
   already pass. Compare 24-term transition instants, leap-month split on day
   15/16, 23:00 crossover, center hosted stem, Yin god directions and Sihua.
